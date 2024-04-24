@@ -4,6 +4,15 @@ public class Account {
     private String lastName;
     private DayOfBirth dayOfBirth;
     private String location;
+    private Sex sex;
+    public Account(String firstName, String lastName, DayOfBirth dayOfBirth, String location, Sex sex) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dayOfBirth = dayOfBirth;
+        this.location = location;
+        this.sex = sex;
+    }
+
     public  Account(){}
     public String getFirstName() {
         return firstName;
@@ -37,5 +46,13 @@ public class Account {
         this.location = location;
     }
 
+    public Sex getSex() {
+        return sex;
+    }
+
+    public void setSex(Sex sex) {
+        this.sex = sex;
+    }
 }
+
 

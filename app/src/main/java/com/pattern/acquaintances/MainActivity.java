@@ -11,6 +11,10 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.pattern.acquaintances.databinding.ActivityMainBinding;
+import com.pattern.acquaintances.model.Account;
+import com.pattern.acquaintances.model.DBManager;
+import com.pattern.acquaintances.model.DayOfBirth;
+import com.pattern.acquaintances.model.Sex;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,6 +22,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        DBManager db = new DBManager();
+        db.signIn("m.pomogaev@g.nsu.ru", "123123");
+        Account acc = new Account();
+        acc.setLastName("Крутой");
+        acc.setFirstName("Мистер");
+        acc.setSex(Sex.male);
+        acc.setLocation("Семёрка");
+        acc.setDayOfBirth(new DayOfBirth(2002,12, 10));
+        db.saveAccountData(acc);
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
