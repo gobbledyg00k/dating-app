@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1037265177529",
+    "firebase_url": "https://allure-34b6e-default-rtdb.firebaseio.com",
+    "project_id": "allure-34b6e",
+    "storage_bucket": "allure-34b6e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1037265177529:android:d8bd71749fc1cad9f9c468",
+        "android_client_info": {
+          "package_name": "com.pattern.acquaintances"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7dfpcKOnQSYeHMur1keThSjfsAaTq7QY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -11,7 +11,8 @@
     <string name="welcome">"Welcome !"</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
+    <string name="login_failed">Failed login! Please, check login and password!</string>
+    <string name="register_failed">Unable to register account!</string>
     <string name="entry">Войти</string>
     <string name="create_acc">Создать аккаунт</string>
     <string name="enter_the_password">Введите пароль</string>
