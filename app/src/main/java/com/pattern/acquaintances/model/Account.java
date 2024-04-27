@@ -1,11 +1,12 @@
 package com.pattern.acquaintances.model;
+
 public class Account {
     private String firstName;
     private String lastName;
     private DayOfBirth dayOfBirth;
     private String location;
-    private Sex sex;
-    public Account(String firstName, String lastName, DayOfBirth dayOfBirth, String location, Sex sex) {
+    private String sex;
+    public Account(String firstName, String lastName, DayOfBirth dayOfBirth, String location, String sex) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dayOfBirth = dayOfBirth;
@@ -46,13 +47,11 @@ public class Account {
         this.location = location;
     }
 
-    public Sex getSex() {
+    public String getSex() {
         return sex;
     }
 
-    public void setSex(Sex sex) {
+    public void setSex(String sex) {
         this.sex = sex;
     }
 }
-
-

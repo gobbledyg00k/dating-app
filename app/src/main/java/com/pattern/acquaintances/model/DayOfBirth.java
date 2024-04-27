@@ -1,7 +1,5 @@
 package com.pattern.acquaintances.model;
 
-import java.security.InvalidParameterException;
-
 public class DayOfBirth {
     private int year;
     private int month;
