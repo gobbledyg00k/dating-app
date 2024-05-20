@@ -23,10 +23,14 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.pattern.acquaintances.databinding.ActivityMainBinding;
+import com.pattern.acquaintances.model.Account;
 import com.pattern.acquaintances.model.AuthManager;
 import com.pattern.acquaintances.model.DBManager;
+import com.pattern.acquaintances.model.MatchesHandler;
 import com.pattern.acquaintances.model.StorageManager;
+import com.pattern.acquaintances.model.User;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -42,10 +46,26 @@ public class MainActivity extends AppCompatActivity {
         AuthManager auth = new AuthManager();
         store = new StorageManager();
         auth.signIn("m.pomogaev@g.nsu.ru", "123123");
-        mainHandler = new Handler();
-
-
         super.onCreate(savedInstanceState);
+        MatchesHandler handler = new MatchesHandler(getFilesDir());
+        Handler h = new Handler();
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                User newUser = handler.getNextUser();
+                if (newUser != null) {
+                    Account userAccount = newUser.getAccount();
+                    Log.i("MainActivity", "Got new user: " + userAccount.getLastName() + " " + userAccount.getFirstName());
+                } else {
+                    Log.i("MainActivity", "No user");
+                }
+            }
+        };
+        for (int i = 0; i < 30; ++i) {
+            h.postDelayed(r, 5000 + i * 450);
+        }
+
+        mainHandler = new Handler();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

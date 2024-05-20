@@ -22,12 +22,11 @@ public class DBManager {
 
     public DBManager(){
         dataBase = FirebaseDatabase.getInstance();
-
         mAuth = FirebaseAuth.getInstance();
         mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if (firebaseAuth.getCurrentUser() != null){
+                if (firebaseAuth.getCurrentUser() != null) {
                     setAccountDataChangeListener();
                 }
             }
@@ -68,7 +67,6 @@ public class DBManager {
     public Account getAccountData() {
         return accountData;
     }
-
     private void setAccountDataChangeListener(){
         DatabaseReference users = dataBase.getReference("users");
         String uid = mAuth.getUid();
