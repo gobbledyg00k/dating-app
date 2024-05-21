@@ -1,4 +1,4 @@
-package com.pattern.acquaintances.login;
+package com.pattern.acquaintances.ui.login;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.pattern.acquaintances.R;
-import com.pattern.acquaintances.login.entry.EntryActivity;
-import com.pattern.acquaintances.login.registration.RegistrationActivity;
+import com.pattern.acquaintances.ui.login.entry.EntryActivity;
+import com.pattern.acquaintances.ui.login.registration.RegistrationActivity;
 
 public class LoginActivity extends AppCompatActivity {
 

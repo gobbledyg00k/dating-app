@@ -22,11 +22,15 @@ public class DashboardFragment extends Fragment {
                 new ViewModelProvider(this).get(DashboardViewModel.class);
 
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
 
-        final TextView textView = binding.textDashboard;
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-        return root;
+        //getData();
+
+
+        return binding.getRoot();
+    }
+
+    private void getData() {
+        //TODO: здесь нужно получать данные для карточек
     }
 
     @Override

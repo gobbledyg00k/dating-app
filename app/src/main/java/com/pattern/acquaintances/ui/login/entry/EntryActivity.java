@@ -1,4 +1,4 @@
-package com.pattern.acquaintances.login.entry;
+package com.pattern.acquaintances.ui.login.entry;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;

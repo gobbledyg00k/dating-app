@@ -13,19 +13,19 @@
         android:theme="@style/Theme.Acquaintances"
         tools:targetApi="31">
         <activity
-            android:name=".login.registration.PersonalDataActivity"
+            android:name=".ui.login.registration.PersonalDataActivity"
             android:exported="false" />
         <activity
-            android:name=".login.entry.EntryActivity"
+            android:name=".ui.login.entry.EntryActivity"
             android:exported="false" />
         <activity
-            android:name=".login.registration.RegistrationActivity"
+            android:name=".ui.login.registration.RegistrationActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="false"/>
         <activity
-            android:name=".login.LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:exported="true"
             android:label="@string/app_name" >
             <intent-filter>
