@@ -5,11 +5,13 @@ import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,11 +31,14 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.logging.LogRecord;
 
 public class MatchesHandler {
@@ -42,12 +47,17 @@ public class MatchesHandler {
     private FirebaseDatabase dataBase;
     private FirebaseStorage store;
     private DatabaseReference usersRef;
+    private DatabaseReference likesRef;
     private StorageReference profilesRef;
     private File filesDir;
     private File uidFile;
     private String userId;
-    private Deque<String> idsDeque = new ConcurrentLinkedDeque<String>();
     private Deque<User> usersDeque = new ConcurrentLinkedDeque<User>();
+    private Deque<String> idsDeque = new ConcurrentLinkedDeque<String>();
+    private Deque<String> matchesIdsDeque = new ConcurrentLinkedDeque<String>();
+    private Deque<String> likesIdsDeque = new ConcurrentLinkedDeque<String>();
+    private Deque<String> likedIdsDeque = new ConcurrentLinkedDeque<String>();
+    private Map<String, User> matchesMap = new ConcurrentHashMap<String, User>();
     private AtomicBoolean isGettingNewAccounts = new AtomicBoolean(false);
     private int loadIdsNum = 5;
 
@@ -65,22 +75,32 @@ public class MatchesHandler {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
         dataBase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
         store = FirebaseStorage.getInstance();
+        usersRef = dataBase.getReference("users");
+        likesRef = dataBase.getReference("likes");
+        profilesRef = store.getReference("profile");
         mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if (firebaseAuth.getCurrentUser() != null){
                     userId = firebaseAuth.getUid();
+                    runFillIdDeque();
+                    addLikesChangeListener();
+                    addLikedChangeListener();
+                } else {
+                    userId = null;
                 }
             }
         });
-        usersRef = dataBase.getReference("users");
-        profilesRef = store.getReference("profile");
-        runFillIdDeque();
     }
-    public User getNextUser(){
+    public User getNextUser() {
+        if (userId == null) {
+            Log.e(logTag, "User is not signed in");
+            return null;
+        }
         User nextUser = new User();
         if (!idsDeque.isEmpty()) {
             idsDeque.pollFirst();
@@ -91,6 +111,165 @@ public class MatchesHandler {
         }
         runFillIdDeque();
         return nextUser;
+    }
+    public void likeUser(User user){
+        if (userId == null) {
+            Log.e(logTag, "User is not signed in");
+            return;
+        }
+        sendReaction(user, true);
+    }
+    public void dislikeUser(User user){
+        if (userId == null) {
+            Log.e(logTag, "User is not signed in");
+            return;
+        }
+        sendReaction(user, false);
+    }
+    public ArrayList<User> getMatchesArray(){
+        ArrayList<User> matches = new ArrayList<>();
+        for (User user: matchesMap.values()){
+            matches.add(user);
+        }
+        return  matches;
+    }
+    private void addLikesChangeListener(){
+        likesRef.child(userId).child("myLikes").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue(boolean.class)) {
+                    String uid = snapshot.getKey();
+                    likesIdsDeque.add(uid);
+                    Log.i(logTag, "Added new like");
+                    if (likedIdsDeque.contains(uid)) {
+                        addNewMatch(uid);
+                    }
+                }
+            }
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                String uid = snapshot.getKey();
+                if (snapshot.getValue(boolean.class)) {
+                    likesIdsDeque.add(uid);
+                    Log.i(logTag, "Added new like");
+                    if (likedIdsDeque.contains(uid)) {
+                        addNewMatch(uid);
+                    }
+                } else {
+                    likesIdsDeque.remove(uid);
+                    Log.i(logTag, "Removed like");
+                    removeMatch(uid);
+                }
+            }
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                String uid = snapshot.getKey();
+                if (snapshot.getValue(boolean.class)) {
+                    likesIdsDeque.remove(uid);
+                    Log.i(logTag, "Removed like");
+                    removeMatch(uid);
+                }
+            }
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
+    private void addLikedChangeListener(){
+        likesRef.child(userId).child("liked").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue(boolean.class)) {
+                    String uid = snapshot.getKey();
+                    likedIdsDeque.add(uid);
+                    Log.i(logTag, "Added new liked");
+                    if (likesIdsDeque.contains(uid)) {
+                        addNewMatch(uid);
+                    }
+                }
+            }
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                String uid = snapshot.getKey();
+                if (snapshot.getValue(boolean.class)) {
+                    likedIdsDeque.add(uid);
+                    Log.i(logTag, "Added new liked");
+                    if (likesIdsDeque.contains(uid)) {
+                        addNewMatch(uid);
+                    }
+                } else {
+                    likedIdsDeque.remove(uid);
+                    Log.i(logTag, "Removed liked");
+                    removeMatch(uid);
+                }
+            }
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                String uid = snapshot.getKey();
+                if (snapshot.getValue(boolean.class)) {
+                    likedIdsDeque.remove(uid);
+                    Log.i(logTag, "Removed liked");
+                    removeMatch(uid);
+                }
+            }
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
+    private void addNewMatch(String uid){
+        getUserByUid(uid, new Function<User, Void>() {
+            @Override
+            public Void apply(User user) {
+                matchesMap.put(uid, user);
+                return null;
+            }
+        });
+        Log.i(logTag, "New match: " + uid);
+    }
+    private void removeMatch(String uid){
+        matchesIdsDeque.remove(uid);
+        matchesMap.remove(uid);
+        Log.i(logTag, "Removed match: " + uid);
+    }
+    private void sendReaction(User user, boolean isLike){
+        String uid = user.getUid();
+        likesRef.child(uid).child("liked").child(userId).setValue(isLike).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                String userName = user.getAccount().getFirstName();
+                if (task.isSuccessful()){
+                    if (isLike) {
+                        Log.i(logTag, "Left like for " + userName);
+                    } else {
+                        Log.i(logTag, "Left dislike for " + userName);
+                    }
+                } else {
+                    Log.i(logTag, "Couldn't left like for " + userName);
+                }
+            }
+        });
+        likesRef.child(userId).child("myLikes").child(uid).setValue(isLike).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                String userName = user.getAccount().getFirstName();
+                if (task.isSuccessful()){
+                    if (isLike) {
+                        Log.i(logTag, "Saved like for " + userName);
+                    } else {
+                        Log.i(logTag, "Saved dislike for " + userName);
+                    }
+                } else {
+                    Log.i(logTag, "Couldn't save like for " + userName);
+                }
+            }
+        });
     }
     private void runFillIdDeque(){
         if (isGettingNewAccounts.compareAndSet(false, true)) {
@@ -143,8 +322,7 @@ public class MatchesHandler {
         newUser.setUid(newUid);
         newUser.setAccount(newAcc);
         if (!newUid.equals(userId) && !idsDeque.contains(newUid)) {
-            StorageReference profileRef = profilesRef.child(newUid);
-            profileRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+            getUserPhoto(newUid, new OnCompleteListener<Uri>() {
                 @Override
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
@@ -165,6 +343,40 @@ public class MatchesHandler {
             saveNewUid(newUid);
             fillIdDeque();
         }
+    }
+    private void getUserByUid(String uid, Function<User, Void> listener){
+        User newUser = new User();
+        newUser.setUid(uid);
+        DatabaseReference userRef = usersRef.child(uid);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    newUser.setAccount(snapshot.getValue(Account.class));
+                    getUserPhoto(uid, new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if (task.isSuccessful()){
+                                newUser.setProfile(task.getResult());
+                                Log.e(logTag, "Couldn't find user profile");
+                            }
+                            listener.apply(newUser);
+                            Log.i(logTag, "Added new user to matches map");
+                        }
+                    });
+                } else {
+                    Log.i(logTag, "Couldn't find account data" + uid);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.i(logTag, "Couldn't get account data" + uid);
+            }
+        });
+    }
+    private void getUserPhoto(String uid, OnCompleteListener<Uri> listener){
+        StorageReference profileRef = profilesRef.child(uid);
+        profileRef.getDownloadUrl().addOnCompleteListener(listener);
     }
     private String getNextUID(){
         String uid;

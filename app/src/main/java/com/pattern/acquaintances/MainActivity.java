@@ -33,6 +33,7 @@ import com.pattern.acquaintances.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,9 +46,23 @@ public class MainActivity extends AppCompatActivity {
         DBManager db = new DBManager();
         AuthManager auth = new AuthManager();
         store = new StorageManager();
+        auth.signOut();
         auth.signIn("m.pomogaev@g.nsu.ru", "123123");
         super.onCreate(savedInstanceState);
         MatchesHandler handler = new MatchesHandler(getFilesDir());
+        Handler h = new Handler();
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<User> matches = handler.getMatchesArray();
+                for (User user: matches){
+                    Log.i("MainActivity", user.getUid() + user.getProfile());
+                }
+                Log.i("MainActivity", "showed users");
+            }
+        };
+        h.postDelayed(r, 4000);
+        /*
         Handler h = new Handler();
         Runnable r = new Runnable() {
             @Override
@@ -56,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 if (newUser != null) {
                     Account userAccount = newUser.getAccount();
                     Log.i("MainActivity", "Got new user: " + userAccount.getLastName() + " " + userAccount.getFirstName());
+                    handler.likeUser(newUser);
                 } else {
                     Log.i("MainActivity", "No user");
                 }
@@ -64,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < 30; ++i) {
             h.postDelayed(r, 5000 + i * 450);
         }
-
+        */
         mainHandler = new Handler();
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
