@@ -2,7 +2,7 @@
     <string name="app_name">acquaintances</string>
     <string name="title_home">Профиль</string>
     <string name="title_dashboard">Анкеты</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_communication">Общение</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
