@@ -28,12 +28,14 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
-import com.pattern.acquaintances.MainActivity;
+import com.pattern.acquaintances.ui.login.LoginActivity;
 import com.pattern.acquaintances.R;
 
 import com.pattern.acquaintances.model.Account;
+import com.pattern.acquaintances.model.AuthManager;
 import com.pattern.acquaintances.model.DBManager;
 import com.pattern.acquaintances.model.DayOfBirth;
+import com.pattern.acquaintances.model.StorageManager;
 
 import java.util.Calendar;
 import java.util.Objects;
@@ -51,6 +53,8 @@ public class PersonalDataActivity extends AppCompatActivity {
     private RadioGroup radioGroup;
     private String gender;
     private DBManager db;
+    private AuthManager auth;
+    private StorageManager storage;
     private  Account acc;
 
     @Override
@@ -103,8 +107,10 @@ public class PersonalDataActivity extends AppCompatActivity {
         String email = Objects.requireNonNull(arguments.get("email")).toString();
         String pass = Objects.requireNonNull(arguments.get("password")).toString();
         db = new DBManager();
-        db.signIn(email, pass);
+        auth = new AuthManager();
+        auth.signIn(email, pass);
         acc = new Account();
+        storage = new StorageManager();
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,8 +131,8 @@ public class PersonalDataActivity extends AppCompatActivity {
                         Intent data = result.getData();
                         assert data != null;
                         Uri imageUri = data.getData();
-
-                        imageView.setImageURI(imageUri); //TODO надо ее еще как-то скачать в БД
+                        imageView.setImageURI(imageUri);
+                        storage.saveProfile(imageUri);
                     }
                     else {
                         Toast.makeText(PersonalDataActivity.this, "Cancelled...", Toast.LENGTH_SHORT).show();
@@ -148,9 +154,7 @@ public class PersonalDataActivity extends AppCompatActivity {
         acc.setSex(gender);
         acc.setDayOfBirth(new DayOfBirth(birthYear,birthMonth, birthDate));
         db.saveAccountData(acc);
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
-
-        System.out.println("Button clicked");
     }
 }

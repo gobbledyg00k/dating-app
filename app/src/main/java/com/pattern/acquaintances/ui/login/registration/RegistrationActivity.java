@@ -12,9 +12,10 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
-import com.pattern.acquaintances.MainActivity;
 import com.pattern.acquaintances.R;
 import com.pattern.acquaintances.model.DBManager;
+import com.pattern.acquaintances.model.AuthManager;
+
 
 
 public class RegistrationActivity extends AppCompatActivity {
@@ -24,7 +25,7 @@ public class RegistrationActivity extends AppCompatActivity {
     private EditText editTextTextPassword;
     private EditText editTextTextPassword2;
     private DBManager db;
-
+    private AuthManager auth;
     private String email;
     private String pass;
 
@@ -38,8 +39,9 @@ public class RegistrationActivity extends AppCompatActivity {
         textView = findViewById(R.id.textView);
         editTextTextEmailAddress = findViewById(R.id.editTextTextEmailAddress);
         db = new DBManager();
+        auth = new AuthManager();
 
-        db.setSignUpOnComplete(new OnCompleteListener<AuthResult>() { //TODO catching exceptions in right way
+        auth.setSignUpOnComplete(new OnCompleteListener<AuthResult>() { //TODO catching exceptions in right way
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()) {
@@ -61,7 +63,7 @@ public class RegistrationActivity extends AppCompatActivity {
         String pass_confirm = editTextTextPassword2.getText().toString();
         email = editTextTextEmailAddress.getText().toString();
         if(pass.equals(pass_confirm)){
-            db.signUp(email, pass);
+            auth.signUp(email, pass);
         } else{
             textView.setText(R.string.pass_dont_match);
         }
