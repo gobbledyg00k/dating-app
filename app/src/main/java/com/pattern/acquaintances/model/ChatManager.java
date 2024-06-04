@@ -28,8 +28,6 @@ public class ChatManager {
     private String otherUid;
     private boolean isFirst;
     private long newestMsgDate;
-    private ConcurrentLinkedDeque<Long> datesReadList = new ConcurrentLinkedDeque<>();
-    private int datesReadLimit = 30;
     private Function<Message, Void> onNewMsg;
     private Function<Message, Void> onLastMsg;
     public ChatManager(User user, Function<Message, Void> onNewMsg_, Function<Message, Void> onLastMsg_){
@@ -106,13 +104,7 @@ public class ChatManager {
             newestMsgDate = date;
             onNewMsg.apply(msg);
         } else {
-            if (!datesReadList.contains(date)) {
-                datesReadList.addFirst(date);
-                onLastMsg.apply(msg);
-                if (datesReadList.size() > datesReadLimit) {
-                    datesReadList.pollLast();
-                }
-            }
+            onLastMsg.apply(msg);
         }
     }
     private String chooseUid(boolean isFirstUid) {
