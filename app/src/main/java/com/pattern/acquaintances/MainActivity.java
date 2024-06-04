@@ -25,8 +25,10 @@ import androidx.navigation.ui.NavigationUI;
 import com.pattern.acquaintances.databinding.ActivityMainBinding;
 import com.pattern.acquaintances.model.Account;
 import com.pattern.acquaintances.model.AuthManager;
+import com.pattern.acquaintances.model.ChatManager;
 import com.pattern.acquaintances.model.DBManager;
 import com.pattern.acquaintances.model.MatchesHandler;
+import com.pattern.acquaintances.model.Message;
 import com.pattern.acquaintances.model.StorageManager;
 import com.pattern.acquaintances.model.User;
 
@@ -34,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,12 +59,26 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 ArrayList<User> matches = handler.getMatchesArray();
                 for (User user: matches){
-                    Log.i("MainActivity", user.getUid() + user.getProfile());
+                    if (user.getUid().equals("SXyZqOfwp7P3V7SC0GnIADd16tj2")) {
+                        ChatManager chat = new ChatManager(user, new Function<Message, Void>() {
+                            @Override
+                            public Void apply(Message message) {
+                                Log.i("MainActivity", "new" + message.getDateMili() + " " + message.getUid());
+                                return null;
+                            }
+                        }, new Function<Message, Void>() {
+                            @Override
+                            public Void apply(Message message) {
+                                Log.i("MainActivity", "old" + message.getDateMili() + " " + message.getUid());
+                                return null;
+                            }
+                        });
+                        chat.sendMsg("Hellow world");
+                    }
                 }
-                Log.i("MainActivity", "showed users");
             }
         };
-        h.postDelayed(r, 4000);
+        h.postDelayed(r, 6000);
         /*
         Handler h = new Handler();
         Runnable r = new Runnable() {
