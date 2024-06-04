@@ -27,6 +27,7 @@ import com.pattern.acquaintances.model.Account;
 import com.pattern.acquaintances.model.AuthManager;
 import com.pattern.acquaintances.model.ChatManager;
 import com.pattern.acquaintances.model.DBManager;
+import com.pattern.acquaintances.model.DayOfBirth;
 import com.pattern.acquaintances.model.MatchesHandler;
 import com.pattern.acquaintances.model.Message;
 import com.pattern.acquaintances.model.StorageManager;
@@ -46,7 +47,22 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        DBManager db = new DBManager();
+        DBManager db = new DBManager(new Function<Account, Void>() {
+            @Override
+            public Void apply(Account account) {
+                Log.i("MainActivity", "got Account:" + account.getFirstName() + " " + account.getLastName());
+                return null;
+            }
+        });
+        Handler hand = new Handler();
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                DayOfBirth date = new DayOfBirth(1,1,1);
+                db.saveAccountData(new Account("Крутой", "Мистер", date, "12","мужской"));
+            }
+        };
+        hand.postDelayed(run, 2000);
         AuthManager auth = new AuthManager();
         store = new StorageManager();
         auth.signOut();
