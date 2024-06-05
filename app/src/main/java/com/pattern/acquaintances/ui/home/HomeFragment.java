@@ -33,30 +33,30 @@ public class HomeFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         HomeViewModel homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
-        /*storage.setGetProfileOnCompete(new OnCompleteListener<Uri>() {
+        StorageManager storage = new StorageManager();
+        storage.setGetProfileOnCompete(new OnCompleteListener<Uri>() {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()){
                     binding.imageView2.setImageURI(task.getResult());
                 }
             }
-        });*/
-
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-        email = ((MainActivity)getActivity()).getEmail();
-        pass = ((MainActivity)getActivity()).getPass();
+        });
         DBManager db = new DBManager(new Function<Account, Void>() {
             @Override
             public Void apply(Account account) {
                 String name = account.getFirstName() + " " + account.getLastName();
                 Log.i("MainActivity", name);
-                binding.textView2.setText(name);
+                binding.textHome.setText(name);
+                storage.getProfilePhoto();
                 return null;
             }
         });
+        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
+        email = ((MainActivity)getActivity()).getEmail();
+        pass = ((MainActivity)getActivity()).getPass();
         AuthManager auth = new AuthManager();
-        StorageManager storage = new StorageManager();
         auth.signIn(email, pass);
         final TextView textView = binding.textHome;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
