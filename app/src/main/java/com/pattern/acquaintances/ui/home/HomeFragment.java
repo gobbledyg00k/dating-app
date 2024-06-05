@@ -2,6 +2,7 @@ package com.pattern.acquaintances.ui.home;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import com.pattern.acquaintances.model.Account;
 import com.pattern.acquaintances.model.AuthManager;
 import com.pattern.acquaintances.model.DBManager;
 import com.pattern.acquaintances.model.StorageManager;
+
+import java.util.function.Function;
 
 public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
@@ -43,13 +46,18 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
         email = ((MainActivity)getActivity()).getEmail();
         pass = ((MainActivity)getActivity()).getPass();
-        DBManager db = new DBManager();
+        DBManager db = new DBManager(new Function<Account, Void>() {
+            @Override
+            public Void apply(Account account) {
+                String name = account.getFirstName() + " " + account.getLastName();
+                Log.i("MainActivity", name);
+                binding.textView2.setText(name);
+                return null;
+            }
+        });
         AuthManager auth = new AuthManager();
         StorageManager storage = new StorageManager();
         auth.signIn(email, pass);
-        Account acc = db.getAccountData();
-        String name = acc.getFirstName() + " " + acc.getLastName();
-        binding.textView2.setText(name);
         final TextView textView = binding.textHome;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;

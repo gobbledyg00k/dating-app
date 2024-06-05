@@ -13,9 +13,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.pattern.acquaintances.R;
+import com.pattern.acquaintances.model.Account;
 import com.pattern.acquaintances.model.DBManager;
 import com.pattern.acquaintances.model.AuthManager;
 
+import java.util.function.Function;
 
 
 public class RegistrationActivity extends AppCompatActivity {
@@ -38,7 +40,12 @@ public class RegistrationActivity extends AppCompatActivity {
         editTextTextPassword = findViewById(R.id.editTextTextPassword);
         textView = findViewById(R.id.textView);
         editTextTextEmailAddress = findViewById(R.id.editTextTextEmailAddress);
-        db = new DBManager();
+        db = new DBManager(new Function<Account, Void>() {
+            @Override
+            public Void apply(Account account) {
+                return null;
+            }
+        });
         auth = new AuthManager();
 
         auth.setSignUpOnComplete(new OnCompleteListener<AuthResult>() { //TODO catching exceptions in right way

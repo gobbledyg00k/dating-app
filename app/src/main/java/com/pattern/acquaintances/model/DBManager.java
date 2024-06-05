@@ -13,16 +13,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.function.Function;
+
 public class DBManager {
     private String logTag = "Database";
     private FirebaseAuth mAuth;
     private FirebaseDatabase dataBase;
     private Account accountData = null;
     OnCompleteListener<Void> saveAccDataOnComplete = null;
+    Function<Account, Void> onGetAccountData;
 
-    public DBManager(){
+    public DBManager(Function<Account, Void> onGetAccountData_){
         dataBase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        onGetAccountData = onGetAccountData_;
         mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -59,14 +63,6 @@ public class DBManager {
     public void setSaveAccDataOnComplete(OnCompleteListener<Void> saveAccDataOnComplete) {
         this.saveAccDataOnComplete = saveAccDataOnComplete;
     }
-    /**
-     * возвращает данные об аккаунте в объекте аккаунт
-     * данные обновляются в реальном времени, то есть при изменении данных в БД, вернёт последнюю версию
-     * если данные ещё не пришли вернёт null
-     */
-    public Account getAccountData() {
-        return accountData;
-    }
     private void setAccountDataChangeListener(){
         DatabaseReference users = dataBase.getReference("users");
         String uid = mAuth.getUid();
@@ -80,6 +76,7 @@ public class DBManager {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 accountData = snapshot.getValue(Account.class);
                 Log.i(logTag, "Got new account data");
+                onGetAccountData.apply(accountData);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {

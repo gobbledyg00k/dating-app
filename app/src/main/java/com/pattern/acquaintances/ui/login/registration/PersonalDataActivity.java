@@ -39,6 +39,7 @@ import com.pattern.acquaintances.model.StorageManager;
 
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.function.Function;
 
 public class PersonalDataActivity extends AppCompatActivity {
 
@@ -106,7 +107,12 @@ public class PersonalDataActivity extends AppCompatActivity {
         assert arguments != null;
         String email = Objects.requireNonNull(arguments.get("email")).toString();
         String pass = Objects.requireNonNull(arguments.get("password")).toString();
-        db = new DBManager();
+        db = new DBManager(new Function<Account, Void>() {
+            @Override
+            public Void apply(Account account) {
+                return null;
+            }
+        });
         auth = new AuthManager();
         auth.signIn(email, pass);
         acc = new Account();
